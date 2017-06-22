@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src=javascripts/test.js type="text/javascript"></script>
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <meta charset="UTF-8">
+    <title>main</title>
+</head>
+<body>
+<div class="box2">
+    <h2>
+        What are you bringing to the party?
+    </h2>
+    <input type="text" id="sendID" placeholder="your ID"> <br>
+    <select id="sendItem" >
+        <option value="Cake">Cake</option>
+        <option value="Bamba">Bamba</option>
+        <option value="Coca cola">Coca cola</option>
+        <option value="Water">Water</option>
+        <option value="Pasta">Pasta</option>
+        <option value="Orange juice">Orange juice</option>
+        <option value="Coffe">Coffe</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <br>
+    <br>
+    <input type="button" name="get" value="Send" onclick="add()">
+    <br>
+    <h1 id="enterItem"></h1>
+
+</div>
+
+<div class="box2">
+    <br>
+    <input type="button" name="get" value="List of all items" onclick="getAllItems()"> <br>
+    <br>
+    <input type="radio" name="radio" id="getItemById" value="GET"> Get by ID
+    <input type="radio" name="radio" id="deleteById" value="DELETE"> Delete by ID
+    <input type="text" id="handlerID" placeholder="ID"> <br>
+    <br>
+    <input type="submit" value="Done" onclick="handleItem()">
+    <br>
+    <h1 id="ItemSelected"></h1>
+</div>
+</body>
+</html>
+
