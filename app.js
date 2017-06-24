@@ -29,8 +29,8 @@ var logedInUsersTag = {}; //{uid , barak};
 configureLists();
 
 
-app.get("/",function(req,res){
-    res.sendFile(path.join(__dirname + "/" + "public" + "/" + "hello.html" ));
+app.get("/", function (req, res) {
+    res.sendFile(path.join(__dirname + "/" + "public" + "/" + "hello.html"));
 });
 // Set the public directory for all static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -38,11 +38,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/login/:userId/:password', function (req, res) {
     var name = req.params.userId;
     var pass = req.params.password;
-
     authenticationLogin(name, pass, function (val) {
         //Exist
         if (val) {
-            console.log(logedInUsers);
             var uid = logedInUsers[req.params.user];
             //Already logged in
             if (uid) { // Return his UID
@@ -77,11 +75,14 @@ app.post('/register/:userId/:password', function (req, res) {
             var jsonObj = JSON.stringify(obj, null, 2);
             //Callback when created
             jsonfile.appendFile(file, jsonObj, function (err) {
-                console.error(err)
+                if (err) {
+                    res.status(500).send("Opps, Something went wrong..");
+                    return;
+                }
             });
             res.status(200).send("redirect");
         } else {
-            res.status(500).send("Opps, The user is already exists  ");
+            res.status(500).send("Opps, The user is already exists");
         }
     });
 });
@@ -104,7 +105,6 @@ app.use('/', function (req, res, next) {
         res.cookie('uid', UIDcountrer);
         next();
     } else {
-        console.log("NUSER DOESNT EXIST");
         res.status(500).send("cant access private page without cookie");
     }
 });
@@ -117,7 +117,8 @@ app.post("/item", upload.array(), function (req, res, next) {
 
     fs.readFile(items, 'utf8', function (err, data) {
         if (err) {
-            throw err;
+            res.status(500).send("Opps, Something went wrong..");
+            return;
         }
 
         var bool = false;
@@ -135,7 +136,10 @@ app.post("/item", upload.array(), function (req, res, next) {
         if (!bool) {
             //item doesnt exis in the file then enter
             jsonfile.appendFile(items, JSON.stringify(obj), function (err) {
-                console.error(err)
+                if(err) {
+                    res.status(500).send("Something went wrong");
+                    return;
+                }
             });
             res.status(200).send("Thank you!");
         } else {
@@ -149,21 +153,23 @@ app.put('/item', function (req, res, next) {
     var id = req.body.id;
     var data = req.body.data;
     fs.readFile(items, function (err, data) {
-
+        if(err){
+            res.status(500).send("Opps, Something went wrong..");
+            return;
+        }
         var arr = JSON.parse(data);
         var obj = {id: id, data: data};
         //Search for if the item exist
         for (x in arr) {
             if (arr[x].id === id) {
                 arr[x] = obj;
-                console.log("exist!");
                 res.send("Item exist");
             }
         }
         //We write a new item
         fs.writeFile(items, JSON.stringify(arr), function (err) {
             if (err)
-                throw new Error("Error while updating the file");
+                res.status(500).send("Opps, Something went wrong..");
         });
     });
 });
@@ -171,12 +177,13 @@ app.put('/item', function (req, res, next) {
 
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/items', function (req, res) {
-    fs.readFile(items,"utf-8", function (err, data) {
+    fs.readFile(items, "utf-8", function (err, data) {
         if (err) {
-            throw (err);
+            res.status(500).send("Opps, Something went wrong..");
+            return;
         }
 
-        if(data.length == 0){
+        if (data.length == 0) {
             res.status(500);
             res.send("The list is empty");
             return;
@@ -187,11 +194,9 @@ app.get('/items', function (req, res) {
         var itemsArray = JSON.parse(text);
         var list = "";
 
-        for (var i = 0 ; i < itemsArray.length ; i++) {
-            list += itemsArray[i].data +'<br>' ;
-            }
-            console.log(list);
-
+        for (var i = 0; i < itemsArray.length; i++) {
+            list += itemsArray[i].data + '<br>';
+        }
         res.send(JSON.stringify(list));
     })
 })
@@ -201,23 +206,20 @@ app.get('/item/:id', function (req, res) {
     var id = req.params.id;
     var data = fs.readFileSync(items, "utf-8");
     // Emptry list
-    if(data.length == 0){
-        res.status(500);
-        res.send("No match foumd");
+    if (data.length == 0) {
+        res.status(404).send("No match find!");
         return;
     }
     var text = data.replace(/}{/g, "},{").replace(/^{/, "[{") + "]";
     var itemsArray = JSON.parse(text);
 
     for (i in itemsArray) {
-        console.log("currnt id is: " + itemsArray[i].id);
         if (itemsArray[i].id === id) {
-            console.log("Found a match!")
             res.send(itemsArray[i].data);
             return;
         }
     }
-    res.send("No match find!");
+    res.status(404).send("No match find!");
 });
 
 
@@ -234,9 +236,11 @@ app.delete('/item/:id', function (req, res) {
             if (itemsArray[i].id === id) {
                 itemsArray.splice(i, 1);
                 var newFile = JSON.stringify(itemsArray).replace("[", "").replace("]", "");
-                console.log(newFile);
                 fs.writeFile(items, newFile, null, function (err) {
-                    if (err) throw new Error("error");
+                    if (err){
+                        res.status(404).send("Something went wrong..!");
+                        return;
+                        }
                 })
                 res.status(200).send("Item deleted!");
                 return;
@@ -244,7 +248,6 @@ app.delete('/item/:id', function (req, res) {
         }
     }
 
-    console.log("log");
     res.status(404).send("No match find!");
     return;
 })
@@ -252,11 +255,9 @@ app.delete('/item/:id', function (req, res) {
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    console.log("Server: nothing else cought it, so error")
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
-
 });
 
 // error handler
@@ -273,7 +274,7 @@ app.use(function (err, req, res, next) {
 function authenticationRegister(userName, callback) {
     fs.readFile(file, 'utf8', function (err, data) {
         if (err) {
-            throw err;
+            res.status(500).send("Opps, Something went wrong..");
         }
         //Convert the JSON file to apropriate format
         if (data.length !== 0) {
@@ -294,12 +295,12 @@ function authenticationRegister(userName, callback) {
 function authenticationLogin(userName, pass, callback) {
     fs.readFile(file, 'utf8', function (err, data) {
         if (err) {
-            throw err;
+            res.status(500).send("Opps, Something went wrong..");
         }
 
-        if (data.length !== 0) {
+        if (data.length != 0) {
             var x = data.replace(/}{/g, "},{").replace(/^{/, "[{") + "]";
-            var x = JSON.parse(x);
+            x = JSON.parse(x);
             for (i in x) {
                 if (x[i].userName === userName && x[i].password == pass) {
                     callback(true);
@@ -312,7 +313,6 @@ function authenticationLogin(userName, pass, callback) {
 }
 
 function configureLists() {
-    console.log("Configure");
     jsonfile.appendFile(file, "", function (err) {
         if (err)
             throw Error("Error while creating user list");
@@ -325,5 +325,3 @@ function configureLists() {
 }
 
 module.exports = app;
-
-// Test for the shich!!!!!!

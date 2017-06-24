@@ -1,6 +1,6 @@
 {
-  "name": "untitled6",
-  "version": "0.0.0",
+  "name": "Exercise3",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"

@@ -1,8 +1,3 @@
-/**
- * Created by barak on 16/06/2017.
- */
-
-
 function login() {
     var userName = document.getElementById("usernameField").value;
     var password = document.getElementById("passwordField").value;
@@ -23,7 +18,7 @@ function login() {
                 this.responseText;
         }
     };
-    http.open("POST", "http://127.0.0.1:3000/login/" + params, true);
+    http.open("POST", "http://localhost:8080/login/" + params, true);
     http.send();
 }
 
@@ -35,7 +30,7 @@ register() {
     if (userName.length == 0 || password.length == 0) {
         document.getElementById("registerDiv").innerHTML =
             "please fill al the fields";
-            return;
+        return;
     }
     var http = new XMLHttpRequest();
     var params = userName + '/' + password;
@@ -47,11 +42,12 @@ register() {
             window.location.href = "/login.html"
         }
         if (this.readyState == 4 && this.status == 500) {
+            console.log("HERE");
             document.getElementById("registerDiv").innerHTML =
                 this.responseText;
         }
     };
-    http.open("POST", "http://127.0.0.1:3000/register/" + params, true);
+    http.open("POST", "http://localhost:8080/register/" + params, true);
     http.send();
 }
 
@@ -60,6 +56,12 @@ function add() {
     var id = document.getElementById("sendID").value;
     var item = document.getElementById("sendItem").value;
     var http = new XMLHttpRequest();
+
+    if (id.length == 0) {
+        document.getElementById("enterItem").innerHTML =
+            "Please fill al the fields";
+        return;
+    }
     http.onreadystatechange = function () {
         //Implement
         if (this.readyState == 4 && this.status == 200) {
@@ -75,12 +77,10 @@ function add() {
     };
     var obj = {id: id, data: item};
     var data = JSON.stringify(obj);
-    http.open("POST", "http://127.0.0.1:3000/item", true);
+    http.open("POST", "http://localhost:8080/item", true);
     http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     http.send(data);
 }
-
-// Sheich is Sheich!!!!!!!
 
 
 function getAllItems() {
@@ -104,7 +104,7 @@ function getAllItems() {
         }
     };
     console.log("Before sending the request");
-    http.open("GET", "http://127.0.0.1:3000/items", true);
+    http.open("GET", "http://localhost:8080/items", true);
     http.send();
     console.log("After sending the request");
 }
@@ -112,18 +112,18 @@ function getAllItems() {
 function handleItem() {
 
     var http = new XMLHttpRequest();
-    var radio1= document.getElementById("getItemById");
+    var radio1 = document.getElementById("getItemById");
     var radio2 = document.getElementById("deleteById");
     var id = document.getElementById("handlerID").value;
 
     var method = false;
 
-    if(radio1.checked)
+    if (radio1.checked)
         method = "GET";
     else
         method = "DELETE";
 
-    if(id.length ==0 || !method ){
+    if (id.length == 0 || !method) {
         document.getElementById("ItemSelected").innerHTML = "Please fill all the fields";
         return;
     }
@@ -139,9 +139,10 @@ function handleItem() {
 
         }
         if (this.readyState == 4 && this.status == 404) {
-        }document.getElementById("ItemSelected").innerHTML = this.responseText;
+        }
+        document.getElementById("ItemSelected").innerHTML = this.responseText;
     };
-    http.open(method, "http://127.0.0.1:3000/item/" + id, true);
+    http.open(method, "http://localhost:8080/item/" + id, true);
     http.send();
 }
 
